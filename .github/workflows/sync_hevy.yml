@@ -2,24 +2,25 @@ name: Sincronizzazione Automatica Hevy Garmin
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Gira da solo online ogni 4 ore
-  workflow_dispatch: # Crea il tasto per farlo partire a mano quando vuoi
+    - cron: '0 * * * *' # Gira ogni ora automaticamente
+  workflow_dispatch: # Ti permette di lanciarlo a mano per fare i test
 
 jobs:
   run-sync:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Installa il programma
         run: pip install hevy2garmin
 
-      - name: Avvia Sincronizzazione
+      - name: Avvia Sincronizzazione con Token
         env:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          # Passiamo il gettone del browser direttamente come variabile d'ambiente
+          GARMIN_TOKENS: ${{ secrets.GARMIN_TOKENS }}
         run: hevy2garmin sync
