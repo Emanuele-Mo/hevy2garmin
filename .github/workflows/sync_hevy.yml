@@ -9,11 +9,6 @@ jobs:
   run-sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Cambia instradamento di rete (Bypass 429)
-        run: |
-          sudo echo "nameserver 1.1.1.1" | sudo tee /etc/resolvconf/resolv.conf.d/base > /dev/null || true
-          sudo echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolvconf/resolv.conf.d/base > /dev/null || true
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -22,9 +17,16 @@ jobs:
       - name: Installa il programma
         run: pip install hevy2garmin
 
-      - name: Avvia Sincronizzazione Standard
+      - name: Configura la sessione del Browser
+        env:
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+        run: |
+          mkdir -p ~/.config/hevy2garmin/garmin_tokens
+          # Creiamo il file di configurazione inserendo il gettone del browser
+          echo '{"username": "${{ secrets.GARMIN_EMAIL }}", "session": ${{ secrets.GARMIN_TOKENS }}}' > ~/.config/hevy2garmin/garmin_tokens/${GARMIN_EMAIL}
+
+      - name: Avvia Sincronizzazione
         env:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
         run: hevy2garmin sync
