@@ -22,4 +22,4 @@ jobs:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
-        run: hevy2garmin --sync
+        run: hevy2garmin sync
