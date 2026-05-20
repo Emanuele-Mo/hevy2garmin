@@ -2,13 +2,18 @@ name: Sincronizzazione Automatica Hevy Garmin
 
 on:
   schedule:
-    - cron: '0 * * * *' # Gira ogni ora automaticamente
-  workflow_dispatch: # Permette il lancio manuale
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   run-sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Cambia instradamento di rete (Bypass 429)
+        run: |
+          sudo echo "nameserver 1.1.1.1" | sudo tee /etc/resolvconf/resolv.conf.d/base > /dev/null || true
+          sudo echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolvconf/resolv.conf.d/base > /dev/null || true
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -17,15 +22,9 @@ jobs:
       - name: Installa il programma
         run: pip install hevy2garmin
 
-      - name: Configura il Token del Browser
-        run: |
-          # Creiamo la cartella corretta dove lo script si aspetta di trovare i token salvati
-          mkdir -p ~/.config/hevy2garmin/garmin_tokens
-          # Prendiamo il Secret di GitHub e lo salviamo nel file di sessione richiesto
-          echo '${{ secrets.GARMIN_TOKENS }}' > ~/.config/hevy2garmin/garmin_tokens/garmin_tokens.json
-
-      - name: Avvia Sincronizzazione con Token
+      - name: Avvia Sincronizzazione Standard
         env:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
         run: hevy2garmin sync
