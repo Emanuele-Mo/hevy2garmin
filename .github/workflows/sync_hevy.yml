@@ -3,7 +3,7 @@ name: Sincronizzazione Automatica Hevy Garmin
 on:
   schedule:
     - cron: '0 * * * *' # Gira ogni ora automaticamente
-  workflow_dispatch: # Ti permette di lanciarlo a mano per fare i test
+  workflow_dispatch: # Permette il lancio manuale
 
 jobs:
   run-sync:
@@ -17,10 +17,15 @@ jobs:
       - name: Installa il programma
         run: pip install hevy2garmin
 
+      - name: Configura il Token del Browser
+        run: |
+          # Creiamo la cartella corretta dove lo script si aspetta di trovare i token salvati
+          mkdir -p ~/.config/hevy2garmin/garmin_tokens
+          # Prendiamo il Secret di GitHub e lo salviamo nel file di sessione richiesto
+          echo '${{ secrets.GARMIN_TOKENS }}' > ~/.config/hevy2garmin/garmin_tokens/garmin_tokens.json
+
       - name: Avvia Sincronizzazione con Token
         env:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
-          # Passiamo il gettone del browser direttamente come variabile d'ambiente
-          GARMIN_TOKENS: ${{ secrets.GARMIN_TOKENS }}
         run: hevy2garmin sync
